@@ -21,13 +21,23 @@ class Server:
                 client.send(msg)
 
     def handle_client(self, client):
-        msg = client.recv(1024).decode()
-        print(msg)
-        if msg == "buy":
-            print("hi")
-        elif msg == "list":
-            client.send(str(self.items).encode())
-        client.send("server recieved ack".encode())
+        try:
+            while True:
+                msg = client.recv(1024).decode()
+                
+                if "has left the market" in msg:
+                    print(msg)
+                    client.close()
+                    return
+                if msg == "buy":
+                    client.send("bought".encode())
+                elif msg == "list":
+                    client.send(str(self.items).encode())
+                
+                else:
+                    client.send("ack".encode())
+        except:
+            print("Connection lost!")
 
     def run(self):
         while True:
@@ -37,8 +47,7 @@ class Server:
             client, _ = self.server.accept()
             self.clients.append(client)
             thread = threading.Thread(target=self.handle_client, args=(client,))
-            thread.start()
-            
+            thread.start() 
 
 
 if __name__ == "__main__":
