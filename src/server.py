@@ -11,26 +11,22 @@ class Server:
         self.seller_id = seller_id
         self.host = host
         self.port = port
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server.bind((self.host, self.port))
-        self.server.listen(5)
-        self.clients = []
         self.items = {"flour": 5, "sugar": 5, "potato": 5, "oil": 5}
         self.current_item = None
         self.start_time = None
 
-    def handle_client(self, client):
+
+    def handle_client(self, client_address, msg):
         def send_msg(msg):
-            client.send(msg.encode())
+            self.server.sendto(msg.encode(), client_address)
 
         try:
             while True:
-                msg = client.recv(1024).decode()
-
                 if "left and quit" in msg:
-                    print(msg)
-                    client.close()
-                    return
+                    print(f"{WARNING}{msg}{ENDC}")
+                    break
 
                 if msg.startswith("buy"):
                     amount = int(msg.split()[1])
@@ -39,8 +35,8 @@ class Server:
                     if self.current_item:
                         if self.items[self.current_item] >= amount:
                             self.items[self.current_item] -= amount
-                            send_msg(
-                                f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
+                            print(
+                                f"\n{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
                             )
                         else:
                             send_msg(f"{WARNING}Insufficient amount of {self.current_item} left.{ENDC}")
@@ -54,8 +50,10 @@ class Server:
 
                 else:
                     send_msg("ack")
+
         except:
             print(f"{FAIL}Connection lost!{ENDC}")
+
 
     def timer(self):
         if self.current_item:
@@ -73,6 +71,7 @@ class Server:
 
         self.select_next_item()
 
+    
     def select_next_item(self):
         # Logic to select the next item to put on sale
         items_with_stock = [item for item, stock in self.items.items() if stock > 0]
@@ -84,19 +83,23 @@ class Server:
                     break
 
             self.current_item = next_item
-            print(f"{CYAN}Next item on sale: {UNDERLINE}{self.current_item}{ENDC}")
+            print(f"\n{CYAN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}")
             timer_thread = threading.Thread(target=self.timer)
             timer_thread.start()
 
+    
     def run(self):
         while True:
             if not self.current_item:
                 self.select_next_item()
 
-            client, _ = self.server.accept()
-            self.clients.append(client)
-            thread = threading.Thread(target=self.handle_client, args=(client,))
-            thread.start()
+            # Receive data from buyers
+            data, client_address = self.server.recvfrom(1024)
+            msg = data.decode()
+
+            # Create a new thread to handle each client
+            client_thread = threading.Thread(target=self.handle_client, args=(client_address, msg))
+            client_thread.start()
 
 
 if __name__ == "__main__":
