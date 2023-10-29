@@ -4,7 +4,7 @@ Worth 30% of overall grade!
 
 # Buyer-Seller System
 
-This system simulates an electronic food marketplace with buyers and sellers. It allows multiple buyers to connect to a seller and perform various actions which are: 
+This python program simulates an electronic food marketplace with buyers and sellers. It allows multiple buyers to connect to a seller and perform various actions which are: 
 - buying items,
 - listing available items
 - joining the marketplace
