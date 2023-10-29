@@ -1,9 +1,12 @@
 import socket
 import sys
 import threading
+from colours import *
+
+BUFFER = 3000
 
 class Client:
-    def __init__(self, buyer_id, host="localhost", port=5000):
+    def __init__(self, buyer_id, host="127.0.0.1", port=9999):
         self.buyer_id = buyer_id
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a UDP socket
         self.server_address = (host, port)
@@ -12,17 +15,12 @@ class Client:
         self.client.sendto(msg.encode(), self.server_address)
 
 
-    def recv_msg_thread(self):
+    def recv_msg(self):
         while True:
-            print(self.client)
-            data, _ = self.client.recvfrom(1024)
+            data, _ = self.client.recvfrom(BUFFER)
             msg = data.decode()
             print(msg)
-
-    def start_recv_msg_thread(self):
-        recv_thread = threading.Thread(target=self.recv_msg_thread)
-        recv_thread.start()
-
+            break
     
 
 if __name__ == "__main__":
@@ -33,35 +31,35 @@ if __name__ == "__main__":
     joined = False
     
     client = Client(buyer_id, host, port)
-    client.start_recv_msg_thread()
+    # client.start_recv_msg()
     
-    print(f"Buyer {buyer_id} connected to {host}:{port}\n")
+    print(f"{HEADER}Buyer {buyer_id} connected to {host}:{port}{ENDC}\n")
 
     while True:
         request = input(f"Enter your request ({', '.join(valid_commands)}): ").lower()
 
         if (request not in valid_commands[1:]) and not (request.startswith("buy")):
-            print("Invalid command!")
+            print(f"{WARNING}Invalid command!{ENDC}")
 
         elif request == "join" and joined:
-            print("You are already in the market.")
+            print(f"{WARNING}You are already in the market.{ENDC}")
 
         elif request == "join":
             joined = True
-            print("You have joined the market.")
+            print(f"{GREEN}You have joined the market.{ENDC}")
 
         elif not joined:
-            print("You are not currently in the market. Use 'join' to enter.")
+            print(f"{WARNING}You are not currently in the market. Use 'join' to enter.{ENDC}")
 
         elif joined:
             if request == "quit":
                 print("Exiting...")
-                client.send_msg(f"Buyer {buyer_id} has left and quit the market!")
+                client.send_msg(f"{FAIL}Buyer {buyer_id} has left and quit the market!{ENDC}")
                 break
 
             elif request == "leave":
                 joined = False
-                print("You have left the market.")
+                print(f"{FAIL}You have left the market.{ENDC}")
                 continue
 
             elif request == "list":
@@ -73,8 +71,10 @@ if __name__ == "__main__":
                     if amount > 0:
                         client.send_msg(f"buy {amount} {buyer_id}")
                     else:
-                        print("Amount must be greater than 0!")
+                        print(f"{WARNING}Amount must be greater than 0!{ENDC}")
                         continue
                 except (IndexError, ValueError):
-                    print("Invalid 'buy' command. Usage: buy <integer>")
+                    print(f"{WARNING}Invalid 'buy' command. Usage: buy <integer>{ENDC}")
                     continue
+            
+            client.recv_msg()

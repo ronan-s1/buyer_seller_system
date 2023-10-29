@@ -5,9 +5,10 @@ import threading
 import time
 import random
 
+BUFFER = 3000
 
 class Server:
-    def __init__(self, seller_id, host="localhost", port=5000):
+    def __init__(self, seller_id, host="127.0.0.1", port=9999):
         self.seller_id = seller_id
         self.host = host
         self.port = port
@@ -22,37 +23,29 @@ class Server:
         def send_msg(msg):
             self.server.sendto(msg.encode(), client_address)
 
-        try:
-            while True:
-                if "left and quit" in msg:
-                    print(f"{WARNING}{msg}{ENDC}")
-                    break
+        if "left and quit" in msg:
+            print(f"{WARNING}{msg}{ENDC}")
+            return
 
-                if msg.startswith("buy"):
-                    amount = int(msg.split()[1])
-                    buyer_id = int(msg.split()[2])
+        if msg.startswith("buy"):
+            amount = int(msg.split()[1])
+            buyer_id = int(msg.split()[2])
 
-                    if self.current_item:
-                        if self.items[self.current_item] >= amount:
-                            self.items[self.current_item] -= amount
-                            print(
-                                f"\n{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
-                            )
-                        else:
-                            send_msg(f"{WARNING}Insufficient amount of {self.current_item} left.{ENDC}")
-                    else:
-                        send_msg(f"{WARNING}No item is currently on sale.{ENDC}")
-
-                elif msg == "list":
+            if self.current_item:
+                if self.items[self.current_item] >= amount:
+                    self.items[self.current_item] -= amount
                     send_msg(
-                        f"{GREEN}Stock and Items:   {str(self.items)}\nCurrently on Sale: {UNDERLINE}{self.current_item}{ENDC}"
+                        f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
                     )
-
                 else:
-                    send_msg("ack")
+                    send_msg(f"{WARNING}Insufficient amount of {self.current_item} left.{ENDC}")
+            else:
+                send_msg(f"{WARNING}No item is currently on sale.{ENDC}")
 
-        except:
-            print(f"{FAIL}Connection lost!{ENDC}")
+        elif msg == "list":
+            send_msg(
+                f"{GREEN}Stock and Items:   {str(self.items)}\nCurrently on Sale: {UNDERLINE}{self.current_item}{ENDC}"
+            )
 
 
     def timer(self):
@@ -83,7 +76,7 @@ class Server:
                     break
 
             self.current_item = next_item
-            print(f"\n{CYAN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}")
+            print(f"{CYAN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}")
             timer_thread = threading.Thread(target=self.timer)
             timer_thread.start()
 
@@ -94,7 +87,7 @@ class Server:
                 self.select_next_item()
 
             # Receive data from buyers
-            data, client_address = self.server.recvfrom(1024)
+            data, client_address = self.server.recvfrom(BUFFER)
             msg = data.decode()
 
             # Create a new thread to handle each client
