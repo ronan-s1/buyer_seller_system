@@ -1,0 +1,9 @@
+{
+    "server_host": "127.0.0.6",
+    "server_port": 5004,
+    "clients": [
+        { "host": "127.0.0.1", "port": 5000, "buyer_id": 1 },
+        { "host": "127.0.0.2", "port": 6000, "buyer_id": 2 },
+        { "host": "127.0.0.3", "port": 9999, "buyer_id": 3 }
+    ]
+}

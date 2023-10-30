@@ -5,22 +5,28 @@ import threading
 import time
 import random
 
-BUFFER = 3000
+BUFFER = 10024
+MULTICAST_GROUP = "224.1.1.1"
+MULTICAST_PORT = 5005
 
 class Server:
-    def __init__(self, seller_id, host="127.0.0.1", port=9999):
+    def __init__(self, seller_id, host, port):
         self.seller_id = seller_id
         self.host = host
         self.port = port
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.server.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
         self.server.bind((self.host, self.port))
         self.items = {"flour": 5, "sugar": 5, "potato": 5, "oil": 5}
         self.current_item = None
         self.start_time = None
 
+    def multicast(self, msg):
+        self.server.sendto(msg.encode(), (MULTICAST_GROUP, MULTICAST_PORT))
 
     def handle_client(self, client_address, msg):
         def send_msg(msg):
+            print(client_address)
             self.server.sendto(msg.encode(), client_address)
 
         if "left and quit" in msg:
@@ -33,8 +39,10 @@ class Server:
 
             if self.current_item:
                 if self.items[self.current_item] >= amount:
+                    print(msg)
+                    
                     self.items[self.current_item] -= amount
-                    send_msg(
+                    self.multicast(
                         f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
                     )
                 else:

@@ -1,36 +1,57 @@
 import socket
 import sys
 import threading
+import struct
 from colours import *
 
-BUFFER = 3000
+BUFFER = 10024
+MULTICAST_GROUP = "224.1.1.1"
+MULTICAST_PORT = 5005
 
 class Client:
-    def __init__(self, buyer_id, host="127.0.0.1", port=9999):
+    def __init__(self, buyer_id, host, port, server_host, server_port):
         self.buyer_id = buyer_id
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a UDP socket
-        self.server_address = (host, port)
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.client.bind(("", MULTICAST_PORT))
+        self.mreq = struct.pack("4sl", socket.inet_aton(MULTICAST_GROUP), socket.INADDR_ANY)
+        self.client.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, self.mreq)
+        self.server_address = (server_host, server_port)
+        
+        # Create a separate point-to-point socket for direct communication
+        self.point_to_point_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.point_to_point_client.bind((host, port))
+
+        # Create a thread to continuously receive multicast messages
+        self.multicast_thread = threading.Thread(target=self.receive_multicast_messages)
+        self.multicast_thread.daemon = True
+        self.multicast_thread.start()
 
     def send_msg(self, msg):
-        self.client.sendto(msg.encode(), self.server_address)
-
+        self.point_to_point_client.sendto(msg.encode(), self.server_address)
 
     def recv_msg(self):
+        data, _ = self.point_to_point_client.recvfrom(BUFFER)
+        msg = data.decode()
+        print(msg)
+
+    def receive_multicast_messages(self):
         while True:
             data, _ = self.client.recvfrom(BUFFER)
             msg = data.decode()
-            print(msg)
-            break
-    
+            print(f"Multicast: {msg}")
 
 if __name__ == "__main__":
     valid_commands = ["buy <int>", "list", "quit", "join", "leave"]
     host = sys.argv[1]
     port = int(sys.argv[2])
     buyer_id = int(sys.argv[3])
+    server_host = sys.argv[4]
+    server_port = int(sys.argv[5])
     joined = False
     
-    client = Client(buyer_id, host, port)
+    
+    client = Client(buyer_id, host, port, server_host, server_port)
     # client.start_recv_msg()
     
     print(f"{HEADER}Buyer {buyer_id} connected to {host}:{port}{ENDC}\n")
@@ -78,3 +99,5 @@ if __name__ == "__main__":
                     continue
             
             client.recv_msg()
+            
+            # client.recv_multicast_msg()
