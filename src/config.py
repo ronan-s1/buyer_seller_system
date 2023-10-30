@@ -8,7 +8,6 @@ def read_config():
     host = config.get("Server", "host")
     port = config.getint("Server", "port")
 
-    sellers = dict(config.items("Sellers"))
     buyers = dict(config.items("Buyers"))
 
     buyer_ids = set(buyers.values())

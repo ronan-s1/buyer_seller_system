@@ -20,6 +20,14 @@ class Server:
         self.start_time = None
 
 
+    def broadcast(self, msg):
+        for client in self.clients:
+            try:
+                client.send(msg.encode())
+            except:
+                print(f"{FAIL}Failed to send broadcast message to {client}.{ENDC}")
+
+
     def handle_client(self, client):
         def send_msg(msg):
             client.send(msg.encode())
@@ -40,7 +48,7 @@ class Server:
                     if self.current_item:
                         if self.items[self.current_item] >= amount:
                             self.items[self.current_item] -= amount
-                            send_msg(
+                            self.broadcast(
                                 f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
                             )
                         else:
@@ -85,7 +93,7 @@ class Server:
                     break
 
             self.current_item = next_item
-            print(f"\n{CYAN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}")
+            self.broadcast(f"\n{CYAN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}")
             timer_thread = threading.Thread(target=self.timer)
             timer_thread.start()
 
