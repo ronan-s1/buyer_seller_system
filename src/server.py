@@ -19,14 +19,12 @@ class Server:
         self.current_item = None
         self.start_time = None
 
-
     def broadcast(self, msg):
         for client in self.clients:
             try:
-                client.send(msg.encode())
+                client.send(f"{BLUE}BROADCAST:{ENDC} {msg}".encode())
             except:
-                print(f"{FAIL}Failed to send broadcast message to {client}.{ENDC}")
-
+                print(f"{FAIL}Failed to send broadcast message to:\n{client}.{ENDC}")
 
     def handle_client(self, client):
         def send_msg(msg):
@@ -52,17 +50,23 @@ class Server:
                                 f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
                             )
                         else:
-                            send_msg(f"{WARNING}Insufficient amount of {self.current_item} left.{ENDC}")
+                            send_msg(
+                                f"{WARNING}Insufficient amount of {self.current_item} left.{ENDC}"
+                            )
                     else:
                         send_msg(f"{WARNING}No item is currently on sale.{ENDC}")
 
                 elif msg == "list":
                     send_msg(
-                        f"{GREEN}Stock and Items:   {str(self.items)}\nCurrently on Sale: {UNDERLINE}{self.current_item}{ENDC}"
+                        f"{GREEN}Stock{ENDC} and {CYAN}Items:\n{ENDC}"
+                        + "\n".join(
+                            [
+                                f"{GREEN}{item:<6}{ENDC} {CYAN}->{ENDC} {stock}"
+                                for item, stock in self.items.items()
+                            ]
+                        )
+                        + f"\n\n{UNDERLINE}Selling Now: {self.current_item}{ENDC}"
                     )
-
-                else:
-                    send_msg("ack")
         except:
             print(f"{FAIL}Connection lost!{ENDC}")
 
@@ -88,12 +92,15 @@ class Server:
         if items_with_stock:
             while True:
                 next_item = random.choice(items_with_stock)
+
                 # if next item is diff or if theres only 1 option
                 if (next_item != self.current_item) or (len(items_with_stock) == 1):
                     break
 
             self.current_item = next_item
-            self.broadcast(f"\n{CYAN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}")
+            self.broadcast(
+                f"{GREEN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}"
+            )
             timer_thread = threading.Thread(target=self.timer)
             timer_thread.start()
 

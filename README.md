@@ -10,6 +10,7 @@ This system simulates an electronic food marketplace with buyers and sellers. It
 - joining the marketplace
 - leaving the marketplace
 - quiting (can't join the market again, socket gets disconnected!)
+- Displaying a help menu
 
 The system uses multicast to notify connected nodes (buyers) about successful purchases.
 
@@ -17,6 +18,7 @@ The system uses multicast to notify connected nodes (buyers) about successful pu
 
 - This program was made using Python 3.10.0. I can't confirm this will work correctly with other versions but it most likely would.
 - Windows OS (This README assumes Windows; slight modifications may be needed for other platforms)
+- This program uses no external libraries, only ones part of Python's standard library.
 
 ## Configurations Setup
 

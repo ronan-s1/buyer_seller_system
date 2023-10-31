@@ -2,6 +2,8 @@ import threading
 from colours import *
 import socket
 import sys
+import textwrap
+
 
 class Client:
     def __init__(self, buyer_id, host="localhost", port=5000):
@@ -19,10 +21,26 @@ class Client:
         self.input_thread = threading.Thread(target=self.enter_request)
         self.input_thread.daemon = True
         self.input_thread.start()
-        
-    
+
+    def request_help(self):
+        help_text = textwrap.dedent(
+            f"""\
+            {CYAN}1) buy <amount>:{ENDC} Buy an amount of the current item on sale
+            {CYAN}2) list:{ENDC} List the items on sale and their stock
+            {CYAN}3) join:{ENDC} Join the market
+            {CYAN}4) leave:{ENDC} Leave the market
+            {CYAN}5) quit:{ENDC} Leave the market and can't join back
+            {CYAN}6) help:{ENDC} Display this message
+        """
+        )
+        print(help_text)
+
     def send_msg(self, msg):
-        self.socket.send(msg.encode())
+        try:
+            self.socket.send(msg.encode())
+        except:
+            print(f"{FAIL}Connection lost!{ENDC}")
+            self.socket.close()
 
     def recv_msg(self):
         try:
@@ -30,16 +48,23 @@ class Client:
                 msg = self.socket.recv(1024).decode()
                 if not msg:
                     break
+
                 print(msg)
         except:
             print(f"{FAIL}Connection lost!{ENDC}")
             self.socket.close()
 
     def enter_request(self):
-        while True:
-            request = input(f"Enter your request ({', '.join(self.valid_requests)}): ").lower()
+        print(f"{HEADER}Buyer {buyer_id} connected to {host}:{port}{ENDC}\n")
+        self.request_help()
+        print("Type your request!\n")
 
-            if (request not in self.valid_requests[1:]) and not (request.startswith("buy")):
+        while True:
+            request = input().lower()
+
+            if (request not in self.valid_requests[1:]) and not (
+                request.startswith("buy")
+            ):
                 print(f"{WARNING}Invalid command!{ENDC}")
 
             elif request == "join" and self.joined:
@@ -47,15 +72,19 @@ class Client:
 
             elif request == "join":
                 self.joined = True
-                print(f"{GREEN}You have self.joined the market.{ENDC}")
+                print(f"{GREEN}You have joined the market.{ENDC}")
 
             elif not self.joined:
-                print(f"{WARNING}You are not currently in the market. Use 'join' to enter.{ENDC}")
+                print(
+                    f"{WARNING}You are not currently in the market. Use 'join' to enter.{ENDC}"
+                )
 
             elif self.joined:
                 if request == "quit":
                     print("Exiting...")
-                    self.send_msg(f"Buyer {self.buyer_id} has left and quit the market!")
+                    self.send_msg(
+                        f"Buyer {self.buyer_id} has left and quit the market!"
+                    )
                     break
 
                 elif request == "leave":
@@ -75,7 +104,9 @@ class Client:
                             print(f"{WARNING}Amount must be greater than 0!{ENDC}")
                             continue
                     except (IndexError, ValueError):
-                        print(f"{WARNING}Invalid 'buy' command. Usage: buy <integer>{ENDC}")
+                        print(
+                            f"{WARNING}Invalid 'buy' command. Usage: buy <integer>{ENDC}"
+                        )
 
 
 if __name__ == "__main__":
@@ -83,8 +114,7 @@ if __name__ == "__main__":
     port = int(sys.argv[2])
     buyer_id = int(sys.argv[3])
     client = Client(buyer_id, host, port)
-    print(f"{HEADER}Buyer {buyer_id} connected to {host}:{port}{ENDC}\n")
-    
-    # This main thread will continue running, and the input_thread in the Client class will handle user input.
+
+    # This main thread will continue running
     while True:
         pass
