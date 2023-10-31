@@ -11,8 +11,8 @@ class Client:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((host, port))
 
-        self.valid_requests = ["list", "quit", "join", "leave"]
-        self.joined = False
+        self.valid_requests = ["help", "list", "quit", "join", "leave"]
+        self.joined = True
 
         self.recv_thread = threading.Thread(target=self.recv_msg)
         self.recv_thread.daemon = True
@@ -36,6 +36,7 @@ class Client:
         )
         print(help_text)
 
+    # send message to server
     def send_msg(self, msg):
         try:
             self.socket.send(msg.encode())
@@ -43,6 +44,7 @@ class Client:
             print(f"{FAIL}Connection lost!{ENDC}")
             self.socket.close()
 
+    # recieve message from server
     def recv_msg(self):
         try:
             while True:
@@ -67,8 +69,10 @@ class Client:
 
     # does error extensive checking
     def handle_request(self, request):
+        if request == "help":
+            self.request_help()
         # if request is in valid requests list and if its not a buy command
-        if (request not in self.valid_requests) and (not request.startswith("buy ")):
+        elif (request not in self.valid_requests) and (not request.startswith("buy ")):
             print(f"{WARNING}Invalid command!{ENDC}")
 
         elif request == "join" and self.joined:
@@ -79,9 +83,7 @@ class Client:
             print(f"{GREEN}You have joined the market.{ENDC}")
 
         elif not self.joined:
-            print(
-                f"{WARNING}You are not currently in the market. Use 'join' to enter.{ENDC}"
-            )
+            print(f"{WARNING}You are not currently in the market. Use 'join' to enter.{ENDC}")
 
         # if user joined the market and the request is valid
         elif self.joined:
