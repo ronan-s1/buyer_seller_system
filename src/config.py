@@ -9,9 +9,9 @@ def read_config():
     port = config.getint("Server", "port")
 
     buyers = dict(config.items("Buyers"))
-
     buyer_ids = set(buyers.values())
 
+    # checks for dupes
     if len(buyer_ids) != len(buyers):
         raise ValueError("Duplicate buyer IDs found in config file.")
 

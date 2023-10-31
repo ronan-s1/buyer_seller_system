@@ -46,3 +46,5 @@ python src/main.py
 ```
 
 After running the `main.py`, separate console windows will appear for both the seller and each individual buyer. You can engage with each buyer individually using the CLI specific to that buyer.
+
+It is recommended to use a console that supports ANSI colour codes for text styling.
