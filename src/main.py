@@ -13,9 +13,9 @@ def start_client(host, port, buyer_id):
 if __name__ == "__main__":
     host, port, buyers = read_config()
 
-    # Start the server
+    # start the server
     start_server(host, port, 1)
 
-    # Start the clients
+    # start the clients
     for buyer_id in buyers.values():
         start_client(host, port, int(buyer_id))

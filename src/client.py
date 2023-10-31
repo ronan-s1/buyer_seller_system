@@ -32,7 +32,7 @@ class Client:
             {CYAN}4) leave:{ENDC} Leave the market
             {CYAN}5) quit:{ENDC} Leave the market and can't join back
             {CYAN}6) help:{ENDC} Display this message
-        """
+        	"""
         )
         print(help_text)
 
@@ -41,7 +41,7 @@ class Client:
         try:
             self.socket.send(msg.encode())
         except:
-            print(f"{FAIL}Connection lost!{ENDC}")
+            print(f"{RED}Connection lost!{ENDC}")
             self.socket.close()
 
     # recieve message from server
@@ -54,7 +54,7 @@ class Client:
 
                 print(msg)
         except:
-            print(f"{FAIL}Connection lost!{ENDC}")
+            print(f"{RED}Connection lost!{ENDC}")
             self.socket.close()
 
     # takes in user input
@@ -88,13 +88,13 @@ class Client:
         # if user joined the market and the request is valid
         elif self.joined:
             if request == "quit":
-                print("Exiting...")
+                print(f"{RED}Exiting...{ENDC}")
                 self.send_msg(f"Buyer {self.buyer_id} has left and quit the market!")
                 exit(0)
 
             elif request == "leave":
                 self.joined = False
-                print("You have left the market.")
+                print(f"{RED}You have left the market.{ENDC}")
 
             elif request == "list":
                 self.send_msg("list")
@@ -102,11 +102,13 @@ class Client:
             elif request.startswith("buy "):
                 self.handle_buy_request(request)
 
-    # handling the buy, extracting amount and sending buyer id to seller for broadcast
+    # handling the buy request
     def handle_buy_request(self, request):
         try:
+            # extracting amount
             amount = int(request.split()[1])
             if amount > 0:
+                # also sending buyer id for broadcasting and letting every buyer know who bought what
                 self.send_msg(f"buy {amount} {self.buyer_id}")
             else:
                 print(f"{WARNING}Amount must be greater than 0!{ENDC}")

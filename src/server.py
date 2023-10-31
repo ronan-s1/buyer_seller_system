@@ -25,7 +25,18 @@ class Server:
             try:
                 client.send(f"{BLUE}BROADCAST:{ENDC} {msg}".encode())
             except:
-                print(f"{FAIL}Failed to send broadcast message to:\n{client}.{ENDC}")
+                print(f"{RED}Failed to send broadcast message to:{ENDC}\n{client}")
+    
+    # when all items are sold, disconnect all the clients
+    def disconnect_all_clients(self):
+        for client in self.clients:
+            try:
+                client.send(f"{RED}All items are sold! No stock left...bye bye👋{ENDC}".encode())
+                client.close()
+            except:
+                pass
+        self.clients = []
+        exit(0)
 
     # recieves client message
     def handle_client(self, client):
@@ -47,7 +58,7 @@ class Server:
                 elif msg == "list":
                     self.handle_list_request(send_msg)
         except:
-            print(f"{FAIL}Connection lost!{ENDC}")
+            print(f"{RED}Connection lost!{ENDC}")
 
     def handle_buy_request(self, msg, send_msg):
         # get the buyer id and and amount of the item thats being bought
@@ -73,7 +84,7 @@ class Server:
     # just formatting the items dictionary nicely and sending it back to client
     def handle_list_request(self, send_msg):
         stock_and_items = [
-            f"{GREEN}{item:<6}{ENDC} {CYAN}->{ENDC} {stock}"
+            f"{GREEN}{item:<6}{ENDC} -> {CYAN}{stock}{ENDC}"
             for item, stock in self.items.items()
         ]
         send_msg(
@@ -89,7 +100,7 @@ class Server:
             while duration > 0:
                 # if item is fully sold
                 if self.items[self.current_item] == 0:
-                    print(f"{BLUE}{self.current_item} is fully sold!{ENDC}")
+                    item_switch_reason = f"No stock left for {self.current_item}..."
                     break
 
                 if duration == 30:
@@ -99,11 +110,14 @@ class Server:
 
                 time.sleep(1)
                 duration -= 1
+            
+            if duration == 0:
+                item_switch_reason = "Times up..."
 
         # When time is up, select a new item to be sold
-        self.select_next_item()
+        self.select_next_item(item_switch_reason)
 
-    def select_next_item(self):
+    def select_next_item(self, item_switch_reason=None):
         # list of items that have stock greater than 0
         items_with_stock = [item for item, stock in self.items.items() if stock > 0]
         if items_with_stock:
@@ -117,10 +131,12 @@ class Server:
             # setting new current item on sale and broadcasting it
             self.current_item = next_item
             self.broadcast(
-                f"{GREEN}New item on sale: {UNDERLINE}{self.current_item}{ENDC}"
+                f"{GREEN}{item_switch_reason}new item on sale: {UNDERLINE}{self.current_item}{ENDC}"
             )
             timer_thread = threading.Thread(target=self.timer)
             timer_thread.start()
+        else:
+            self.disconnect_all_clients()
 
     # accepting client and setting up server instance
     def run(self):
