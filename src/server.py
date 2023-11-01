@@ -88,7 +88,7 @@ class Server:
             for item, stock in self.items.items()
         ]
         send_msg(
-            f"{GREEN}Stock{ENDC} and {CYAN}Items:\n{ENDC}"
+            f"{GREEN}Item{ENDC} and {CYAN}Stock:\n{ENDC}"
             + "\n".join(stock_and_items)
             + f"\n\n{UNDERLINE}Selling Now: {self.current_item}{ENDC}"
         )
