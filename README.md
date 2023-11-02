@@ -22,7 +22,7 @@ The system uses multicast to notify connected nodes (buyers) about successful pu
 
 ## Configurations Setup
 
-Modify the config.ini file to configure the system. You can specify the host, port, and IDs for both sellers and buyers.
+Modify the config.ini file to configure the system. You can specify the seller host, seller port, and IDs for buyers.
 
 For the demo, the `config.ini` file would look like this:
 
