@@ -54,12 +54,15 @@ class Server:
         try:
             while True:
                 msg = client.recv(1024).decode()
+                
+                # user leaving market 
                 if "left and quit" in msg:
                     print(f"{WARNING}{msg}{ENDC}")
                     client.close()
                     self.clients.remove(client)
                     return
 
+                # user leaving stall, may still be in the market however
                 elif "left the stall" in msg:
                     print(f"{WARNING}{msg}{ENDC}")
                     send_msg(
@@ -166,7 +169,7 @@ class Server:
             thread = threading.Thread(target=self.handle_client, args=(client,))
             thread.start()
 
-
+# creating server object using the command line arg data
 if __name__ == "__main__":
     host = sys.argv[1]
     port = int(sys.argv[2])

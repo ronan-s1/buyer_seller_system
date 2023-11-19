@@ -85,12 +85,14 @@ class Client:
     def join_new_seller(self):
         self.cls()
         while True:
+            # displaying list of sellers
             for i, (seller_name, (_, port)) in enumerate(self.sellers.items(), start=1):
                 print(f"{CYAN}{i}) {seller_name} -> localhost:{port}{ENDC}")
 
             try:
                 print(f"\nEnter a seller to join:")
                 seller_choice = int(input())
+                # if user inputs a valid number
                 if 1 <= seller_choice <= len(self.sellers):
                     # getting chosen server data
                     chosen_seller = list(self.sellers.keys())[seller_choice - 1]
@@ -141,7 +143,7 @@ class Client:
                 f"{WARNING}You haven't joined a seller's stall yet. Use 'join' to join a seller's stall.{ENDC}"
             )
 
-        # if the user joined the market and the request is valid
+        # if user joined and passed all error checks, then they may perform a request
         elif self.joined:
             if request == "quit":
                 print(f"{RED}Exiting...{ENDC}")
@@ -164,7 +166,7 @@ class Client:
             # extracting amount
             amount = int(request.split()[1])
             if amount > 0:
-                # also sending buyer id for broadcasting and letting every buyer know who bought what
+                # also sending buyer id for broadcasting and letting every buyer know who bought the item
                 self.send_msg(f"buy {amount} {self.buyer_id}")
             else:
                 print(f"{WARNING}Amount must be greater than 0!{ENDC}")
@@ -177,6 +179,7 @@ if __name__ == "__main__":
     sellers = json.loads(sys.argv[2])
     buyer_id = sys.argv[3]
 
+    # basically same as join_new_seller() in Client class
     while True:
         for i, (seller_name, (_, port)) in enumerate(sellers.items(), start=1):
             print(f"{CYAN}{i}) {seller_name} -> localhost:{port}{ENDC}")
