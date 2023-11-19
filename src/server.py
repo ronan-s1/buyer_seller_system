@@ -10,14 +10,14 @@ class Server:
     def __init__(self, seller_name, seller_id, host, port):
         self.seller_name = seller_name
         self.seller_id = seller_id
-        
+
         self.host = host
         self.port = port
-        
+
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.host, self.port))
         self.server.listen(5)
-        
+
         self.clients = []
         self.items = {"flour": 5, "sugar": 5, "potato": 5, "oil": 5}
         self.current_item = None
@@ -27,15 +27,19 @@ class Server:
     def broadcast(self, msg):
         for client in self.clients:
             try:
-                client.send(f"{BLUE}BROADCAST ({self.seller_name}):{ENDC} {msg}".encode())
+                client.send(
+                    f"{BLUE}BROADCAST ({self.seller_name}):{ENDC} {msg}".encode()
+                )
             except:
                 print(f"{RED}Failed to send broadcast message to:{ENDC}\n{client}")
-    
+
     # when all items are sold, disconnect all the clients
     def disconnect_all_clients(self):
         for client in self.clients:
             try:
-                client.send(f"{RED}All items are sold! No stock left...bye bye👋{ENDC}".encode())
+                client.send(
+                    f"{RED}All items are sold! No stock left...bye bye👋{ENDC}".encode()
+                )
                 client.close()
             except:
                 pass
@@ -55,8 +59,15 @@ class Server:
                     client.close()
                     self.clients.remove(client)
                     return
+                
+                elif "left the stall" in msg:
+                    print(f"{WARNING}{msg}{ENDC}")
+                    send_msg(f"{GREEN}You left the stall, enter 'join' to join a seller's stall.{ENDC}")
+                    client.close()
+                    self.clients.remove(client)
+                    return
 
-                if msg.startswith("buy"):
+                elif msg.startswith("buy"):
                     self.handle_buy_request(msg, send_msg)
 
                 elif msg == "list":
@@ -114,7 +125,7 @@ class Server:
 
                 time.sleep(1)
                 duration -= 1
-            
+
             if duration == 0:
                 item_switch_reason = "Times up..."
 
