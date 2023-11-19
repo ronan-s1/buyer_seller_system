@@ -1,21 +1,26 @@
 import os
+import json
 from config import read_config
 
 
-def start_server(host, port, seller_id):
-    os.system(f"start cmd /K python src/server.py {host} {port} {seller_id}")
+def start_server(host, port, seller_name, seller_id):
+    os.system(f"start cmd /K python src/server.py {host} {port} {seller_name} {seller_id}")
 
 
-def start_client(host, port, buyer_id):
-    os.system(f"start cmd /K python src/client.py {host} {port} {buyer_id}")
+def start_client(sellers, buyer_id):
+    sellers_str = json.dumps(sellers)
+    # Escape the double quotes in the JSON string
+    sellers_str_escaped = json.dumps(sellers_str)
+    os.system(f'start cmd /K python src/client.py {sellers_str_escaped} {buyer_id}')
 
 
 if __name__ == "__main__":
-    host, port, buyers = read_config()
+    host, port, buyers, sellers = read_config()
 
-    # start the server
-    start_server(host, port, 1)
+    # launch sellers
+    for seller_name, (seller_id, seller_port) in sellers.items():
+        start_server(host, seller_port, seller_name, seller_id)
 
-    # start the clients
+    # launch clients, also pass in seller data
     for buyer_id in buyers.values():
-        start_client(host, port, int(buyer_id))
+        start_client(sellers, buyer_id)

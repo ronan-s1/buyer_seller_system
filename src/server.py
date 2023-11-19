@@ -7,13 +7,17 @@ import random
 
 
 class Server:
-    def __init__(self, seller_id, host="localhost", port=5000):
+    def __init__(self, seller_name, seller_id, host, port):
+        self.seller_name = seller_name
         self.seller_id = seller_id
+        
         self.host = host
         self.port = port
+        
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.host, self.port))
         self.server.listen(5)
+        
         self.clients = []
         self.items = {"flour": 5, "sugar": 5, "potato": 5, "oil": 5}
         self.current_item = None
@@ -23,7 +27,7 @@ class Server:
     def broadcast(self, msg):
         for client in self.clients:
             try:
-                client.send(f"{BLUE}BROADCAST:{ENDC} {msg}".encode())
+                client.send(f"{BLUE}BROADCAST ({self.seller_name}):{ENDC} {msg}".encode())
             except:
                 print(f"{RED}Failed to send broadcast message to:{ENDC}\n{client}")
     
@@ -153,8 +157,9 @@ class Server:
 if __name__ == "__main__":
     host = sys.argv[1]
     port = int(sys.argv[2])
-    seller_id = int(sys.argv[3])
+    seller_name = sys.argv[3]
+    seller_id = int(sys.argv[4])
 
-    server = Server(seller_id, host, port)
+    server = Server(seller_name, seller_id, host, port)
     print(f"{HEADER}Seller started on {host}:{port}{ENDC}\n")
     server.run()
