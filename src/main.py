@@ -13,7 +13,9 @@ def start_client(server_host, sellers, buyer_id):
     sellers_str = json.dumps(sellers)
     # Escape the double quotes in the JSON string
     sellers_str_escaped = json.dumps(sellers_str)
-    os.system(f"start cmd /K python src/client.py {server_host} {sellers_str_escaped} {buyer_id}")
+    os.system(
+        f"start cmd /K python src/client.py {server_host} {sellers_str_escaped} {buyer_id}"
+    )
 
 
 if __name__ == "__main__":

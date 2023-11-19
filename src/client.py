@@ -30,10 +30,8 @@ class Client:
         self.input_thread.daemon = True
         self.input_thread.start()
 
-
     def cls(self):
         os.system("cls" if os.name == "nt" else "clear")
-
 
     # print help menu
     def request_help(self):
@@ -74,14 +72,15 @@ class Client:
     def enter_request(self):
         time.sleep(0.1)
         self.cls()
-        print(f"{HEADER}Buyer {self.buyer_id} connected to {self.server_host}:{self.server_port}{ENDC}\n")
+        print(
+            f"{HEADER}Buyer {self.buyer_id} connected to {self.server_host}:{self.server_port}{ENDC}\n"
+        )
         self.request_help()
         print("Type your request!\n")
 
         while True and not self.stop_thread:
             request = input().lower()
             self.handle_request(request)
-
 
     def join_new_seller(self):
         self.cls()
@@ -96,13 +95,15 @@ class Client:
                     # getting chosen server data
                     chosen_seller = list(self.sellers.keys())[seller_choice - 1]
                     _, self.server_port = self.sellers[chosen_seller]
-                    
+
                     # close current socket, create new socket and connect to new server
                     self.socket.close()
-                    self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a new socket
+                    self.socket = socket.socket(
+                        socket.AF_INET, socket.SOCK_STREAM
+                    )  # Create a new socket
                     self.socket.connect((self.server_host, self.server_port))
                     self.joined = True
-                    
+
                     # begin threads again
                     self.stop_thread = False
                     self.recv_thread = threading.Thread(target=self.recv_msg)
@@ -120,7 +121,6 @@ class Client:
             except ValueError:
                 print(f"{WARNING}Invalid input. Please enter a valid number.{ENDC}")
 
-
     # does error extensive checking
     def handle_request(self, request):
         if request == "help":
@@ -133,11 +133,13 @@ class Client:
             print(f"{WARNING}You already joined a seller's stall.{ENDC}")
 
         elif request == "join":
-            self.stop_thread = True      
+            self.stop_thread = True
             self.join_new_seller()
 
         elif not self.joined:
-            print(f"{WARNING}You haven't joined a seller's stall yet. Use 'join' to join a seller's stall.{ENDC}")
+            print(
+                f"{WARNING}You haven't joined a seller's stall yet. Use 'join' to join a seller's stall.{ENDC}"
+            )
 
         # if the user joined the market and the request is valid
         elif self.joined:
@@ -188,7 +190,9 @@ if __name__ == "__main__":
                 client = Client(buyer_id, server_host, port, sellers)
                 break
             else:
-                print(f"{WARNING}Invalid choice. Please enter a number between 1 and {len(sellers)}.{ENDC}")
+                print(
+                    f"{WARNING}Invalid choice. Please enter a number between 1 and {len(sellers)}.{ENDC}"
+                )
         except:
             print(f"{WARNING}Invalid input. Please enter a valid number.{ENDC}")
 

@@ -59,10 +59,12 @@ class Server:
                     client.close()
                     self.clients.remove(client)
                     return
-                
+
                 elif "left the stall" in msg:
                     print(f"{WARNING}{msg}{ENDC}")
-                    send_msg(f"{GREEN}You left the stall, enter 'join' to join a seller's stall.{ENDC}")
+                    send_msg(
+                        f"{GREEN}You left the stall, enter 'join' to join a seller's stall.{ENDC}"
+                    )
                     client.close()
                     self.clients.remove(client)
                     return
