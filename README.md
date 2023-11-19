@@ -4,15 +4,13 @@ Worth 30% of overall grade!
 
 # Buyer-Seller System
 
-This system simulates an electronic food marketplace with buyers and sellers. It allows multiple buyers to connect to a seller and perform various actions which are: 
-- buying items,
-- listing available items
-- joining the marketplace
-- leaving the marketplace
+This system simulates an electronic food marketplace with buyers and sellers. It allows multiple buyers to connect to sellers and perform various actions which are: 
+- buying items
+- listing items and their stock
+- joining a seller's stall
+- leaving a seller's stall
 - quiting (can't join the market again, socket gets disconnected!)
 - Displaying a help menu
-
-The system uses multicast to notify connected nodes (buyers) about successful purchases.
 
 ## Prerequisites
 
@@ -31,6 +29,10 @@ For the demo, the `config.ini` file would look like this:
 host = localhost
 port = 5000
 
+[Sellers]
+seller1 = 1
+; seller2 = 2
+
 [Buyers]
 buyer1 = 1
 buyer2 = 2
@@ -45,7 +47,7 @@ Run the `main.py` in the project root director(same directory where this README 
 python src/main.py
 ```
 
-After running the `main.py`, separate console windows will appear for both the seller and each individual buyer. You can engage with each buyer individually using the CLI specific to that buyer.
+After running the `main.py`, separate console windows will appear for both the sellers and buyers. You can engage with each buyer individually using the CLI specific to that buyer.
 
 It is recommended to use a console that supports ANSI colour codes for text styling.
 
