@@ -177,5 +177,5 @@ if __name__ == "__main__":
     seller_id = int(sys.argv[4])
 
     server = Server(seller_name, seller_id, host, port)
-    print(f"{HEADER}Seller started on {host}:{port}{ENDC}\n")
+    print(f"{HEADER}{seller_name} started on {host}:{port}{ENDC}\n")
     server.run()
