@@ -91,7 +91,7 @@ class Server:
             if self.items.get(self.current_item, 0) >= amount:
                 self.items[self.current_item] -= amount
                 self.broadcast(
-                    f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}.{ENDC}"
+                    f"{GREEN}Buyer {buyer_id} bought {UNDERLINE}{amount}kg{ENDC}{GREEN} of {UNDERLINE}{self.current_item}{ENDC}{GREEN} from seller {self.seller_id}. The stock of {self.current_item} is {self.items[self.current_item]}{ENDC}"
                 )
             else:
                 # if stock is less than requested amount
