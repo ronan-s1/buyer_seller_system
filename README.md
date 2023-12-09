@@ -1,7 +1,5 @@
 # Distributed Systems Assignment
 
-Worth 30% of overall grade!
-
 # Buyer-Seller System
 
 This system simulates an electronic food marketplace with buyers and sellers. It allows multiple buyers to connect to sellers and perform various actions which are: 
