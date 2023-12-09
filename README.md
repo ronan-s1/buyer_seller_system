@@ -1,6 +1,4 @@
-# Distributed Systems Assignment
-
-# Buyer-Seller System
+# Buyer-Seller System (Distributed Systems Assignment)
 
 This system simulates an electronic food marketplace with buyers and sellers. It allows multiple buyers to connect to sellers and perform various actions which are: 
 - buying items
